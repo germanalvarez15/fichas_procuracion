@@ -1,0 +1,29 @@
+[
+  {
+    "id": "7643e276-d8b1-4940-9317-eef73add990e",
+    "numero": "2",
+    "nombre": "prueba2",
+    "descripcion": "hola2",
+    "fichas": [],
+    "fecha_creacion": "2025-10-21T21:46:17.902942Z",
+    "fecha_modificacion": "2025-10-21T21:46:17.902942Z"
+  },
+  {
+    "id": "4333a496-c205-4408-943a-93d4aebda5ec",
+    "numero": "prueba 1",
+    "nombre": "hola1",
+    "descripcion": "123abc",
+    "fichas": [
+      {
+        "id": "65e7bb81-62c6-46c5-bd3b-278cf8c23fcf",
+        "titulo": "hola",
+        "descripcion": "123hola",
+        "estado": "Pendiente",
+        "fecha_creacion": "2025-10-21T23:12:56.068780Z",
+        "fecha_modificacion": "2025-10-21T23:12:56.068780Z"
+      }
+    ],
+    "fecha_creacion": "2025-10-21T23:12:40.442902Z",
+    "fecha_modificacion": "2025-10-21T23:12:56.068821Z"
+  }
+]
