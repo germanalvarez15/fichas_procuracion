@@ -1,7 +1,7 @@
+use super::Ficha;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use super::Ficha;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Expediente {

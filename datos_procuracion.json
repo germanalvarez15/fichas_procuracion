@@ -1,29 +1,46 @@
 [
   {
-    "id": "7643e276-d8b1-4940-9317-eef73add990e",
-    "numero": "2",
-    "nombre": "prueba2",
-    "descripcion": "hola2",
-    "fichas": [],
-    "fecha_creacion": "2025-10-21T21:46:17.902942Z",
-    "fecha_modificacion": "2025-10-21T21:46:17.902942Z"
-  },
-  {
-    "id": "4333a496-c205-4408-943a-93d4aebda5ec",
-    "numero": "prueba 1",
-    "nombre": "hola1",
-    "descripcion": "123abc",
+    "id": "5c62e133-17b3-4e84-9535-06b01a44d81f",
+    "numero": "1234",
+    "nombre": "Expedientew 1",
+    "descripcion": "hola12343",
     "fichas": [
       {
-        "id": "65e7bb81-62c6-46c5-bd3b-278cf8c23fcf",
-        "titulo": "hola",
-        "descripcion": "123hola",
-        "estado": "Pendiente",
-        "fecha_creacion": "2025-10-21T23:12:56.068780Z",
-        "fecha_modificacion": "2025-10-21T23:12:56.068780Z"
+        "id": "4705983c-4c87-488f-901e-5ad398b680bf",
+        "titulo": "ficha1",
+        "descripcion": "hola1234",
+        "historial_estados": [
+          {
+            "estado": "tercer estado",
+            "fecha": "2025-10-23T23:53:49.125444Z"
+          },
+          {
+            "estado": "Segundo estado",
+            "fecha": "2025-10-23T23:24:18.104429Z"
+          },
+          {
+            "estado": "PRIMER ESTADO",
+            "fecha": "2025-10-23T23:24:10.193648Z"
+          }
+        ],
+        "fecha_creacion": "2025-10-23T23:24:10.193648Z",
+        "fecha_modificacion": "2025-10-23T23:53:49.125453Z"
+      },
+      {
+        "id": "1ddd9cb3-7939-4de9-8f6e-d2bc134a5f6f",
+        "titulo": "Fecha2",
+        "descripcion": "hola2",
+        "historial_estados": [
+          {
+            "estado": "primer estado 2",
+            "fecha": "2025-10-23T23:54:07.981589Z"
+          }
+        ],
+        "fecha_creacion": "2025-10-23T23:54:07.981589Z",
+        "fecha_modificacion": "2025-10-23T23:54:07.981589Z"
       }
     ],
-    "fecha_creacion": "2025-10-21T23:12:40.442902Z",
-    "fecha_modificacion": "2025-10-21T23:12:56.068821Z"
+    "fecha_creacion": "2025-10-23T23:23:55.215485Z",
+    "fecha_modificacion": "2025-10-23T23:54:07.981628Z"
   }
 ]

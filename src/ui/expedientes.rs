@@ -1,7 +1,7 @@
-use iced::widget::{button, column, container, row, scrollable, text, text_input, Column, Space};
-use iced::{Element, Length, Color, Border};
 use crate::models::Expediente;
 use crate::ui::styles;
+use iced::widget::{button, column, container, row, scrollable, text, text_input, Column, Space};
+use iced::{Border, Color, Element, Length};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -115,10 +115,7 @@ impl ExpedientesView {
             self.vista_lista()
         };
 
-        column![header, contenido]
-            .spacing(10)
-            .padding(20)
-            .into()
+        column![header, contenido].spacing(10).padding(20).into()
     }
 
     fn vista_formulario(&self) -> Element<ExpedienteMessage> {
@@ -211,15 +208,7 @@ impl ExpedientesView {
                 )
                 .padding(15)
                 .width(Length::Fill)
-                .style(|_theme| container::Style {
-                    background: Some(Color::from_rgb(0.95, 0.95, 0.97).into()),
-                    border: Border {
-                        color: Color::from_rgb(0.8, 0.8, 0.8),
-                        width: 1.0,
-                        radius: 5.0.into(),
-                    },
-                    ..Default::default()
-                });
+                .style(styles::card_container);
 
                 column.push(card)
             })

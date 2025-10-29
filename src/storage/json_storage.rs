@@ -30,7 +30,7 @@ impl JsonStorage {
         let contenido = fs::read_to_string(&self.file_path)?;
         let expedientes: Vec<Expediente> = serde_json::from_str(&contenido)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        
+
         self.expedientes = expedientes;
         Ok(())
     }
@@ -39,7 +39,7 @@ impl JsonStorage {
     pub fn guardar(&self) -> io::Result<()> {
         let json = serde_json::to_string_pretty(&self.expedientes)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        
+
         // Crear el directorio si no existe
         if let Some(parent) = self.file_path.parent() {
             fs::create_dir_all(parent)?;

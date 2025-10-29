@@ -8,14 +8,18 @@ use std::path::PathBuf;
 use uuid::Uuid;
 
 use storage::JsonStorage;
-use ui::{ExpedientesView, FichasView};
 use ui::expedientes::ExpedienteMessage;
 use ui::fichas::FichaMessage;
+use ui::{ExpedientesView, FichasView};
 
 fn main() -> iced::Result {
-    iced::application("Fichas Procuración - Sistema de Gestión", FichasProcuracionApp::update, FichasProcuracionApp::view)
-        .theme(FichasProcuracionApp::theme)
-        .run_with(FichasProcuracionApp::new)
+    iced::application(
+        "Fichas Procuración - Sistema de Gestión",
+        FichasProcuracionApp::update,
+        FichasProcuracionApp::view,
+    )
+    .theme(FichasProcuracionApp::theme)
+    .run_with(FichasProcuracionApp::new)
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +45,7 @@ struct FichasProcuracionApp {
 impl FichasProcuracionApp {
     fn new() -> (Self, Task<Message>) {
         let mut storage = JsonStorage::new(PathBuf::from("datos_procuracion.json"));
-        
+
         // Intentar cargar datos
         let _ = storage.cargar();
 
@@ -78,14 +82,8 @@ impl FichasProcuracionApp {
 
     fn view(&self) -> Element<Message> {
         let contenido = match &self.vista_actual {
-            Vista::Expedientes => self
-                .expedientes_view
-                .view()
-                .map(Message::Expediente),
-            Vista::Fichas(_) => self
-                .fichas_view
-                .view()
-                .map(Message::Ficha),
+            Vista::Expedientes => self.expedientes_view.view().map(Message::Expediente),
+            Vista::Fichas(_) => self.fichas_view.view().map(Message::Ficha),
         };
 
         container(contenido)
@@ -154,7 +152,7 @@ impl FichasProcuracionApp {
     fn manejar_mensaje_ficha(&mut self, mensaje: FichaMessage) {
         if let Vista::Fichas(expediente_id) = &self.vista_actual {
             let expediente_id = *expediente_id;
-            
+
             match mensaje {
                 FichaMessage::NuevaFicha => {
                     self.fichas_view.iniciar_nueva_ficha();
@@ -167,8 +165,10 @@ impl FichasProcuracionApp {
                         exp.eliminar_ficha(id);
                         let _ = self.storage.guardar();
                         if let Some(exp_updated) = self.storage.obtener_expediente(expediente_id) {
-                            self.fichas_view
-                                .actualizar_fichas(exp_updated.fichas.clone(), exp_updated.nombre.clone());
+                            self.fichas_view.actualizar_fichas(
+                                exp_updated.fichas.clone(),
+                                exp_updated.nombre.clone(),
+                            );
                         }
                     }
                 }
@@ -179,7 +179,33 @@ impl FichasProcuracionApp {
                     self.fichas_view.descripcion_input = valor;
                 }
                 FichaMessage::EstadoChanged(estado) => {
-                    self.fichas_view.estado_input = estado;
+                    self.fichas_view.estado_input = estado.clone();
+                    self.fichas_view.nuevo_estado_input = estado;
+                }
+                FichaMessage::VerHistorial(ficha_id) => {
+                    self.fichas_view.ficha_historial_id = Some(ficha_id);
+                    self.fichas_view.nuevo_estado_input.clear();
+                }
+                FichaMessage::CerrarHistorial => {
+                    self.fichas_view.ficha_historial_id = None;
+                    self.fichas_view.nuevo_estado_input.clear();
+                }
+                FichaMessage::AgregarEstado(ficha_id) => {
+                    if !self.fichas_view.nuevo_estado_input.is_empty() {
+                        if let Some(exp) = self.storage.obtener_expediente_mut(expediente_id) {
+                            if let Some(ficha) = exp.fichas.iter_mut().find(|f| f.id == ficha_id) {
+                                ficha.agregar_estado(self.fichas_view.nuevo_estado_input.clone());
+                                let _ = self.storage.guardar();
+                                self.fichas_view.nuevo_estado_input.clear();
+                            }
+                        }
+                        if let Some(exp_updated) = self.storage.obtener_expediente(expediente_id) {
+                            self.fichas_view.actualizar_fichas(
+                                exp_updated.fichas.clone(),
+                                exp_updated.nombre.clone(),
+                            );
+                        }
+                    }
                 }
                 FichaMessage::GuardarFicha => {
                     if let Some(exp) = self.storage.obtener_expediente_mut(expediente_id) {
@@ -198,8 +224,10 @@ impl FichasProcuracionApp {
                     let _ = self.storage.guardar();
                     self.fichas_view.cancelar_edicion();
                     if let Some(exp_updated) = self.storage.obtener_expediente(expediente_id) {
-                        self.fichas_view
-                            .actualizar_fichas(exp_updated.fichas.clone(), exp_updated.nombre.clone());
+                        self.fichas_view.actualizar_fichas(
+                            exp_updated.fichas.clone(),
+                            exp_updated.nombre.clone(),
+                        );
                     }
                 }
                 FichaMessage::CancelarEdicion => {

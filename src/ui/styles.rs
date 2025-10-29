@@ -1,5 +1,6 @@
-use iced::{Color, Border, Shadow, Theme};
 use iced::widget::button;
+use iced::widget::container;
+use iced::{Border, Color, Shadow, Theme};
 
 pub fn primary_button(theme: &Theme, status: button::Status) -> button::Style {
     let color = match status {
@@ -43,10 +44,10 @@ pub fn secondary_button(theme: &Theme, status: button::Status) -> button::Style 
 
 pub fn cancel_button(theme: &Theme, status: button::Status) -> button::Style {
     let color = match status {
-button::Status::Active => Color::from_rgb(1.0, 0.0, 0.0),
-button::Status::Hovered => Color::from_rgb(0.9, 0.1, 0.1),
-button::Status::Pressed => Color::from_rgb(0.7, 0.0, 0.0),
-button::Status::Disabled => Color::from_rgb(0.6, 0.3, 0.3),
+        button::Status::Active => Color::from_rgb(1.0, 0.0, 0.0),
+        button::Status::Hovered => Color::from_rgb(0.9, 0.1, 0.1),
+        button::Status::Pressed => Color::from_rgb(0.7, 0.0, 0.0),
+        button::Status::Disabled => Color::from_rgb(0.6, 0.3, 0.3),
     };
 
     button::Style {
@@ -61,3 +62,19 @@ button::Status::Disabled => Color::from_rgb(0.6, 0.3, 0.3),
     }
 }
 
+pub fn card_container(theme: &Theme) -> container::Style {
+    container::Style {
+        background: Some(Color::from_rgb(0.98, 0.98, 0.99).into()),
+        border: Border {
+            color: Color::from_rgb(0.85, 0.85, 0.87),
+            width: 1.0,
+            radius: 8.0.into(),
+        },
+        shadow: Shadow {
+            offset: iced::Vector::new(0.0, 2.0),
+            blur_radius: 4.0,
+            color: Color::from_rgba(0.0, 0.0, 0.0, 0.1),
+        },
+        ..Default::default()
+    }
+}
