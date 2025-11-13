@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EstadoHistorial {
-    pub estado: String,
+pub struct Hoja {
+    pub contenido: String,
     pub fecha: DateTime<Utc>,
 }
 
@@ -13,20 +13,20 @@ pub struct Ficha {
     pub id: Uuid,
     pub titulo: String,
     pub descripcion: String,
-    pub historial_estados: Vec<EstadoHistorial>,
+    pub hojas: Vec<Hoja>,
     pub fecha_creacion: DateTime<Utc>,
     pub fecha_modificacion: DateTime<Utc>,
 }
 
 impl Ficha {
-    pub fn new(titulo: String, descripcion: String, estado_inicial: String) -> Self {
+    pub fn new(titulo: String, descripcion: String, hoja_inicial: String) -> Self {
         let now = Utc::now();
         Self {
             id: Uuid::new_v4(),
             titulo,
             descripcion,
-            historial_estados: vec![EstadoHistorial {
-                estado: estado_inicial,
+            hojas: vec![Hoja {
+                contenido: hoja_inicial,
                 fecha: now,
             }],
             fecha_creacion: now,
@@ -40,21 +40,21 @@ impl Ficha {
         self.fecha_modificacion = Utc::now();
     }
 
-    pub fn agregar_estado(&mut self, estado: String) {
-        let nuevo_estado = EstadoHistorial {
-            estado,
+    pub fn agregar_hoja(&mut self, contenido: String) {
+        let nueva_hoja = Hoja {
+            contenido,
             fecha: Utc::now(),
         };
-        // Insertar al inicio para que el último esté siempre primero
-        self.historial_estados.insert(0, nuevo_estado);
+        // Insertar al inicio para que la última esté siempre primero
+        self.hojas.insert(0, nueva_hoja);
         self.fecha_modificacion = Utc::now();
     }
 
-    pub fn estado_actual(&self) -> Option<&EstadoHistorial> {
-        self.historial_estados.first()
+    pub fn hoja_actual(&self) -> Option<&Hoja> {
+        self.hojas.first()
     }
 
-    pub fn obtener_historial(&self) -> &Vec<EstadoHistorial> {
-        &self.historial_estados
+    pub fn obtener_hojas(&self) -> &Vec<Hoja> {
+        &self.hojas
     }
 }

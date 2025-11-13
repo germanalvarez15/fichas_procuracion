@@ -1,4 +1,4 @@
-use crate::models::Expediente;
+use crate::models::Ficha;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::{self, Write};
@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonStorage {
-    expedientes: Vec<Expediente>,
+    fichas: Vec<Ficha>,
     #[serde(skip)]
     file_path: PathBuf,
 }
@@ -15,7 +15,7 @@ pub struct JsonStorage {
 impl JsonStorage {
     pub fn new(file_path: PathBuf) -> Self {
         Self {
-            expedientes: Vec::new(),
+            fichas: Vec::new(),
             file_path,
         }
     }
@@ -28,16 +28,16 @@ impl JsonStorage {
         }
 
         let contenido = fs::read_to_string(&self.file_path)?;
-        let expedientes: Vec<Expediente> = serde_json::from_str(&contenido)
+        let fichas: Vec<Ficha> = serde_json::from_str(&contenido)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-        self.expedientes = expedientes;
+        self.fichas = fichas;
         Ok(())
     }
 
     /// Guarda los datos en el archivo JSON
     pub fn guardar(&self) -> io::Result<()> {
-        let json = serde_json::to_string_pretty(&self.expedientes)
+        let json = serde_json::to_string_pretty(&self.fichas)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
         // Crear el directorio si no existe
@@ -50,21 +50,21 @@ impl JsonStorage {
         Ok(())
     }
 
-    /// Obtiene todos los expedientes
-    pub fn obtener_expedientes(&self) -> &Vec<Expediente> {
-        &self.expedientes
+    /// Obtiene todas las fichas
+    pub fn obtener_fichas(&self) -> &Vec<Ficha> {
+        &self.fichas
     }
 
-    /// Agrega un nuevo expediente
-    pub fn agregar_expediente(&mut self, expediente: Expediente) -> io::Result<()> {
-        self.expedientes.push(expediente);
+    /// Agrega una nueva ficha
+    pub fn agregar_ficha(&mut self, ficha: Ficha) -> io::Result<()> {
+        self.fichas.push(ficha);
         self.guardar()
     }
 
-    /// Elimina un expediente por ID
-    pub fn eliminar_expediente(&mut self, expediente_id: Uuid) -> io::Result<bool> {
-        if let Some(pos) = self.expedientes.iter().position(|e| e.id == expediente_id) {
-            self.expedientes.remove(pos);
+    /// Elimina una ficha por ID
+    pub fn eliminar_ficha(&mut self, ficha_id: Uuid) -> io::Result<bool> {
+        if let Some(pos) = self.fichas.iter().position(|f| f.id == ficha_id) {
+            self.fichas.remove(pos);
             self.guardar()?;
             Ok(true)
         } else {
@@ -72,10 +72,10 @@ impl JsonStorage {
         }
     }
 
-    /// Actualiza un expediente existente
-    pub fn actualizar_expediente(&mut self, expediente: Expediente) -> io::Result<bool> {
-        if let Some(exp) = self.expedientes.iter_mut().find(|e| e.id == expediente.id) {
-            *exp = expediente;
+    /// Actualiza una ficha existente
+    pub fn actualizar_ficha(&mut self, ficha: Ficha) -> io::Result<bool> {
+        if let Some(f) = self.fichas.iter_mut().find(|f| f.id == ficha.id) {
+            *f = ficha;
             self.guardar()?;
             Ok(true)
         } else {
@@ -83,13 +83,13 @@ impl JsonStorage {
         }
     }
 
-    /// Obtiene un expediente por ID
-    pub fn obtener_expediente(&self, expediente_id: Uuid) -> Option<&Expediente> {
-        self.expedientes.iter().find(|e| e.id == expediente_id)
+    /// Obtiene una ficha por ID
+    pub fn obtener_ficha(&self, ficha_id: Uuid) -> Option<&Ficha> {
+        self.fichas.iter().find(|f| f.id == ficha_id)
     }
 
-    /// Obtiene un expediente mutable por ID
-    pub fn obtener_expediente_mut(&mut self, expediente_id: Uuid) -> Option<&mut Expediente> {
-        self.expedientes.iter_mut().find(|e| e.id == expediente_id)
+    /// Obtiene una ficha mutable por ID
+    pub fn obtener_ficha_mut(&mut self, ficha_id: Uuid) -> Option<&mut Ficha> {
+        self.fichas.iter_mut().find(|f| f.id == ficha_id)
     }
 }

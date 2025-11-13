@@ -1,5 +1,3 @@
-pub mod expediente;
 pub mod ficha;
 
-pub use expediente::Expediente;
-pub use ficha::{EstadoHistorial, Ficha};
+pub use ficha::Ficha;

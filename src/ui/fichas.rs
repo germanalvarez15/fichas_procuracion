@@ -12,12 +12,11 @@ pub enum FichaMessage {
     VerHistorial(Uuid),
     TituloChanged(String),
     DescripcionChanged(String),
-    EstadoChanged(String),
-    AgregarEstado(Uuid),
+    HojaChanged(String),
+    AgregarHoja(Uuid),
     GuardarFicha,
     CancelarEdicion,
     CerrarHistorial,
-    Volver,
 }
 
 #[derive(Debug, Clone)]
@@ -26,11 +25,10 @@ pub struct FichasView {
     pub editando: bool,
     pub titulo_input: String,
     pub descripcion_input: String,
-    pub estado_input: String,
-    pub nuevo_estado_input: String,
+    pub hoja_input: String,
+    pub nueva_hoja_input: String,
     pub ficha_editando_id: Option<Uuid>,
     pub ficha_historial_id: Option<Uuid>,
-    pub expediente_nombre: String,
 }
 
 impl FichasView {
@@ -40,24 +38,22 @@ impl FichasView {
             editando: false,
             titulo_input: String::new(),
             descripcion_input: String::new(),
-            estado_input: String::new(),
-            nuevo_estado_input: String::new(),
+            hoja_input: String::new(),
+            nueva_hoja_input: String::new(),
             ficha_editando_id: None,
             ficha_historial_id: None,
-            expediente_nombre: String::new(),
         }
     }
 
-    pub fn actualizar_fichas(&mut self, fichas: Vec<Ficha>, expediente_nombre: String) {
+    pub fn actualizar_fichas(&mut self, fichas: Vec<Ficha>) {
         self.fichas = fichas;
-        self.expediente_nombre = expediente_nombre;
     }
 
     pub fn iniciar_nueva_ficha(&mut self) {
         self.editando = true;
         self.titulo_input.clear();
         self.descripcion_input.clear();
-        self.estado_input.clear();
+        self.hoja_input.clear();
         self.ficha_editando_id = None;
     }
 
@@ -66,9 +62,9 @@ impl FichasView {
             self.editando = true;
             self.titulo_input = ficha.titulo.clone();
             self.descripcion_input = ficha.descripcion.clone();
-            self.estado_input = ficha
-                .estado_actual()
-                .map(|e| e.estado.clone())
+            self.hoja_input = ficha
+                .hoja_actual()
+                .map(|h| h.contenido.clone())
                 .unwrap_or_default();
             self.ficha_editando_id = Some(ficha_id);
         }
@@ -78,16 +74,16 @@ impl FichasView {
         self.editando = false;
         self.titulo_input.clear();
         self.descripcion_input.clear();
-        self.estado_input.clear();
+        self.hoja_input.clear();
         self.ficha_editando_id = None;
     }
 
     pub fn obtener_ficha_nueva(&self) -> Option<Ficha> {
-        if !self.titulo_input.is_empty() && !self.estado_input.is_empty() {
+        if !self.titulo_input.is_empty() && !self.hoja_input.is_empty() {
             Some(Ficha::new(
                 self.titulo_input.clone(),
                 self.descripcion_input.clone(),
-                self.estado_input.clone(),
+                self.hoja_input.clone(),
             ))
         } else {
             None
@@ -110,12 +106,7 @@ impl FichasView {
             return self.vista_historial(ficha_id);
         }
 
-        let titulo = text(format!("Fichas - {}", self.expediente_nombre)).size(24);
-
-        let boton_volver = button(text("← Volver"))
-            .on_press(FichaMessage::Volver)
-            .padding(10)
-            .style(styles::secondary_button);
+        let titulo = text("Fichas").size(24);
 
         let boton_nueva = button(text("+ Nueva Ficha"))
             .on_press(FichaMessage::NuevaFicha)
@@ -123,8 +114,6 @@ impl FichasView {
             .style(styles::primary_button);
 
         let header = row![
-            boton_volver,
-            Space::with_width(Length::Fill),
             titulo,
             Space::with_width(Length::Fill),
             boton_nueva
@@ -164,10 +153,10 @@ impl FichasView {
         ]
         .spacing(5);
 
-        let estado_picker = column![
-            text("Estado:"),
-            text_input("Estado de la ficha", &self.estado_input)
-                .on_input(FichaMessage::EstadoChanged)
+        let hoja_picker = column![
+            text("Hoja inicial:"),
+            text_input("Contenido de la hoja inicial", &self.hoja_input)
+                .on_input(FichaMessage::HojaChanged)
                 .padding(8),
         ]
         .spacing(5);
@@ -186,7 +175,7 @@ impl FichasView {
             titulo,
             titulo_input,
             descripcion_input,
-            estado_picker,
+            hoja_picker,
             botones
         ]
         .spacing(15)
@@ -201,62 +190,86 @@ impl FichasView {
                 .into();
         }
 
-        let lista: Element<_> = self
-            .fichas
-            .iter()
-            .fold(Column::new().spacing(10), |column, ficha| {
-                let estado_actual = ficha
-                    .estado_actual()
-                    .map(|e| e.estado.as_str())
-                    .unwrap_or("Sin estado");
+        // Agrupar las cards en filas de 3
+        let cards_per_row = 3;
+        let mut rows_container = Column::new().spacing(15).padding(10);
+        
+        for chunk in self.fichas.chunks(cards_per_row) {
+            let mut row_elements = iced::widget::Row::new().spacing(15);
+            
+            for ficha in chunk {
+                let hoja_actual = ficha
+                    .hoja_actual()
+                    .map(|h| h.contenido.as_str())
+                    .unwrap_or("Sin hoja");
+
+                let fecha_hoja_actual = ficha
+                    .hoja_actual()
+                    .map(|h| h.fecha.format("%d/%m/%Y %H:%M").to_string())
+                    .unwrap_or("Sin fecha".into());
 
                 let card = container(
                     column![
                         text(&ficha.titulo).size(18),
                         text(&ficha.descripcion).size(14),
-                        text(format!("Estado actual: {}", estado_actual)).size(12),
+                        row![
+                            text("Ultima Hoja: ").size(12),
+                            text(hoja_actual).size(12).font(iced::Font {
+                                weight: iced::font::Weight::Bold,
+                                ..Default::default()
+                            }),
+                            text(", creada el: ").size(12),
+                            text(fecha_hoja_actual).size(10).font(iced::Font {
+                                weight: iced::font::Weight::Bold,
+                                ..Default::default()
+                            }),
+                        ],
                         text(format!(
                             "Creada: {}",
                             ficha.fecha_creacion.format("%d/%m/%Y %H:%M")
                         ))
                         .size(11),
+                        Space::with_height(Length::Fill),
                         row![
-                            button(text("Ver Historial").center())
+                            button(text("Ver Hojas").center())
                                 .on_press(FichaMessage::VerHistorial(ficha.id))
                                 .padding(8)
-                                .width(Length::Fixed(130.0))
+                                .width(Length::Fixed(110.0))
                                 .style(styles::primary_button),
                             button(text("Editar").center())
                                 .on_press(FichaMessage::EditarFicha(ficha.id))
                                 .padding(8)
-                                .width(Length::Fixed(100.0))
+                                .width(Length::Fixed(85.0))
                                 .style(styles::secondary_button),
                             button(text("Eliminar").center())
                                 .on_press(FichaMessage::EliminarFicha(ficha.id))
-                                .width(Length::Fixed(100.0))
+                                .width(Length::Fixed(90.0))
                                 .style(styles::cancel_button)
                                 .padding(8),
                         ]
-                        .spacing(10),
+                        .spacing(8),
                     ]
                     .spacing(8),
                 )
                 .padding(15)
-                .width(Length::Fill)
+                .width(Length::Fixed(320.0))
+                .height(Length::Fixed(240.0))
                 .style(styles::card_container);
 
-                column.push(card)
-            })
-            .into();
+                row_elements = row_elements.push(card);
+            }
+            
+            rows_container = rows_container.push(row_elements);
+        }
 
-        scrollable(lista).into()
+        scrollable(rows_container).into()
     }
 
     fn vista_historial(&self, ficha_id: Uuid) -> Element<FichaMessage> {
         let ficha = self.fichas.iter().find(|f| f.id == ficha_id);
 
         if let Some(ficha) = ficha {
-            let titulo = text(format!("Historial de Estados - {}", ficha.titulo)).size(24);
+            let titulo = text(format!("Hojas de la Ficha - {}", ficha.titulo)).size(24);
 
             let boton_volver = button(text("← Volver"))
                 .on_press(FichaMessage::CerrarHistorial)
@@ -267,17 +280,17 @@ impl FichasView {
                 .spacing(20)
                 .padding(10);
 
-            // Formulario para agregar nuevo estado
-            let nuevo_estado_form = container(
+            // Formulario para agregar nueva hoja
+            let nueva_hoja_form = container(
                 column![
-                    text("Agregar nuevo estado:").size(16),
+                    text("Agregar nueva hoja:").size(16),
                     row![
-                        text_input("Ingrese el nuevo estado...", &self.nuevo_estado_input)
-                            .on_input(FichaMessage::EstadoChanged)
+                        text_input("Ingrese el contenido de la nueva hoja...", &self.nueva_hoja_input)
+                            .on_input(FichaMessage::HojaChanged)
                             .padding(8)
                             .width(Length::Fill),
                         button(text("Agregar"))
-                            .on_press(FichaMessage::AgregarEstado(ficha_id))
+                            .on_press(FichaMessage::AgregarHoja(ficha_id))
                             .padding(8)
                             .style(styles::primary_button),
                     ]
@@ -289,17 +302,17 @@ impl FichasView {
             .width(Length::Fill)
             .style(styles::card_container);
 
-            // Lista de historial de estados
-            let historial_list: Element<_> = ficha
-                .obtener_historial()
+            // Lista de hojas
+            let hojas_list: Element<_> = ficha
+                .obtener_hojas()
                 .iter()
-                .fold(Column::new().spacing(8), |column, estado_hist| {
-                    let estado_card = container(
+                .fold(Column::new().spacing(8), |column, hoja| {
+                    let hoja_card = container(
                         column![
-                            text(&estado_hist.estado).size(16),
+                            text(&hoja.contenido).size(16),
                             text(format!(
                                 "Fecha: {}",
-                                estado_hist.fecha.format("%d/%m/%Y %H:%M:%S")
+                                hoja.fecha.format("%d/%m/%Y %H:%M:%S")
                             ))
                             .size(12),
                         ]
@@ -317,21 +330,21 @@ impl FichasView {
                         ..Default::default()
                     });
 
-                    column.push(estado_card)
+                    column.push(hoja_card)
                 })
                 .into();
 
-            let historial_container = container(
+            let hojas_container = container(
                 column![
-                    text("Historial (más reciente primero):").size(16),
-                    historial_list,
+                    text("Hojas (más reciente primero):").size(16),
+                    hojas_list,
                 ]
                 .spacing(10),
             )
             .padding(15)
             .width(Length::Fill);
 
-            column![header, nuevo_estado_form, historial_container]
+            column![header, nueva_hoja_form, hojas_container]
                 .spacing(15)
                 .padding(20)
                 .into()
